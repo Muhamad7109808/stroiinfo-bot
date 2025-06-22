@@ -1,0 +1,54 @@
+from aiogram import Bot, Dispatcher, types, executor
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+import logging
+import os
+
+API_TOKEN = os.getenv("TELEGRAM_API_TOKEN") or "your_token_here"
+
+logging.basicConfig(level=logging.INFO)
+
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
+
+main_menu = ReplyKeyboardMarkup(resize_keyboard=True)
+main_menu.add(
+    KeyboardButton("📦 Найти материалы"),
+    KeyboardButton("📍 Поиск по региону")
+)
+main_menu.add(
+    KeyboardButton("💰 Цены на сегодня"),
+    KeyboardButton("📢 Реклама / Новости")
+)
+main_menu.add(KeyboardButton("📝 Связаться с поддержкой"))
+
+@dp.message_handler(commands=['start'])
+async def send_welcome(message: types.Message):
+    await message.reply("👋 Добро пожаловать в СтройИнфо Таджикистан!\nВыберите действие:", reply_markup=main_menu)
+
+@dp.message_handler(lambda message: message.text == "📦 Найти материалы")
+async def find_materials(message: types.Message):
+    await message.answer("🔍 Введите название строительного материала (например: 'цемент', 'песок', 'кирпич'):")
+
+@dp.message_handler(lambda message: message.text == "📢 Реклама / Новости")
+async def send_ads(message: types.Message):
+    await message.answer("🎯 Рекламное объявление:\n🔥 Супер-цены на арматуру в Душанбе!\n📞 +992902XXXXXX\n📍 Адрес: ул. Ленина 14\n📆 Действительно до: 30 июня")
+
+@dp.message_handler(lambda message: message.text == "📍 Поиск по региону")
+async def search_by_region(message: types.Message):
+    await message.answer("🗺 Введите название региона (например: Душанбе, Худжанд, Бохтар):")
+
+@dp.message_handler(lambda message: message.text == "💰 Цены на сегодня")
+async def show_prices(message: types.Message):
+    await message.answer("📊 Текущие цены:\n- Цемент 500: 55 сомони/мешок\n- Арматура 12мм: 13 сомони/м\n- Щебень: 60 сомони/м³")
+
+@dp.message_handler(lambda message: message.text == "📝 Связаться с поддержкой")
+async def contact_support(message: types.Message):
+    await message.answer("📞 Вы можете написать нам в WhatsApp:\n+9927109808\n+992002206817")
+
+@dp.message_handler()
+async def handle_search_query(message: types.Message):
+    query = message.text.lower()
+    await message.answer(f"🔎 Поиск по запросу: {query}\n(Реальные данные будут подключены позже)")
+
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True)
